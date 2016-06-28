@@ -2,3 +2,5 @@
 
 export(BayesKnockdown)
 export(BayesKnockdown.diffExp)
+
+importFrom("stats", "cor")
