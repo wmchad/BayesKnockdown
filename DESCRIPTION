@@ -1,7 +1,7 @@
 Package: BayesKnockdown
 Title: BayesKnockdown: Posterior Probabilities for Edges from Knockdown Data
 Version: 0.99.0
-Date: 2016-05-25
+Date: 2016-06-28
 Author: William Chad Young
 Maintainer: William Chad Young <wmchad@uw.edu>
 Description: A simple, fast Bayesian method for computing posterior
