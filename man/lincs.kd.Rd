@@ -10,6 +10,7 @@ Library of Integrated Network-based Cellular Signatures (LINCS) program
 (\url{http://lincsproject.org}).
 }
 \usage{data("lincs.kd")}
+\value{matrix}
 \format{
   The data is a 21x27 matrix. Each row is the expression level of a
   different gene across 27 knockdown experiments.
