@@ -1,0 +1,212 @@
+\documentclass[12pt]{article}
+%\documentclass[epsf]{siamltex}
+
+\setlength{\topmargin}{0in}
+\setlength{\topskip}{0in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+%\setlength{\footheight}{0in}
+%\setlength{\footskip}{0in}
+\setlength{\textheight}{9in}
+\setlength{\textwidth}{6.5in}
+\setlength{\baselineskip}{20pt}
+\setlength{\leftmargini}{1.5em}
+\setlength{\leftmarginii}{1.5em}
+\setlength{\leftmarginiii}{1.5em}
+\setlength{\leftmarginiv}{1.5em}
+
+\usepackage{epsfig,subfigure,lscape}
+\usepackage[lined,ruled]{algorithm2e}
+\usepackage{hyperref}
+\usepackage{url}
+
+\renewcommand\theequation{\thesection.\arabic{equation}}
+
+\def\hb{\hfil\break}
+
+\def\ib{$\bullet$}
+
+%\VignetteIndexEntry{networkBMA}
+ 
+\begin{document}
+\pagestyle{plain}
+
+
+%Goadrich&2004,KokDomingos2005,SinglaDomingos2005,
+
+%\nocite{Brem&2002,BremKruglyak2005,Yeung&2005,Yeung&2011,Lo&2012,YEASTRACT,Hoeting&1999,BMApackage,iterativeBMApackage,networkBMApackage,SCPD,YPD,ArrayExpress}
+
+\begin{center}
+{\bf Uncovering gene regulatory relationships from knockdown
+  expression data using {\tt BayesKnockdown}}\\[5pt]
+William Chad Young, Ka Yee Yeung, and Adrian E. Raftery\\
+Department of Statistics (WCY and AER) and Institute of Technology (KYY)\\
+University of Washington
+\end{center}
+
+\bigskip
+
+This document illustrates the use of the {\tt BayesKnockdwon} R
+package to calculate posterior probabilities of relationships between
+a single predictor and multiple potential targets. The package was
+developed specifically for gene expression datasets in the form of
+knockdown experiments, but can be applied more generally.
+
+\section{Posterior Probabilities}
+Given a predictor $x$ and a set of possible targets $y$, the
+\texttt{BayesKnockdown} function can be invoked to estimate the
+posterior probabilities of a relationship between $x$ and each
+individual target in $y$ (Young et~al. 2016). The
+\texttt{BayesKnockdown} function allows specification of a prior
+probability of regulation via the \texttt{prior} argument, and it can
+be a constant for all targets or unique to each target. This is useful
+particularly when an informative prior is available to incorporate
+additional knowledge. The prior is set to 0.5 by default, which
+corresponds to an uninformative prior.
+
+Additionally, the method allows specification of Zellner's $g$-prior
+via the \texttt{g} argument. The $g$-prior specifies the expected
+strength of the signal relative to noise, with larger values
+corresponding to a larger expected signal. It is recommended that $g$
+be set to a value between 1 and the number of observations in the
+data. The default value is $\sqrt{n}$, which we have found to be a
+good compromise between the extremes
+
+\subsection{Simulated Data Example}
+
+As a simple example of using the \texttt{BayesKnockdown} function, we
+generate random data for the knockdown gene as well as the potential
+targets. We then introduce a relationship between the knockdown gene
+and target number 3. The \texttt{BayesKnockdown} function takes this
+data and produces the posterior probability of a relationship between
+$x$ and each target. Figure \ref{fig:simPlot} shows the posterior
+probabilities calculated for each target.
+
+<<SimulatedEx>>=
+library(BayesKnockdown);
+set.seed(1618);
+n <- 100;
+p <- 10;
+x <- rnorm(n);
+y <- matrix(nrow=p, data=rnorm(n*p));
+y[3,] <- y[3,] + 0.5*x;
+
+simResult <- BayesKnockdown(x, y);
+
+barplot(simResult, names.arg="", xlab="Target Gene",
+        ylab="Posterior Probability", ylim=c(0,1));
+@ 
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=.6\textwidth]{simBarPlot.png}
+  \end{center}
+  \caption{Bar plot showing the posterior probabilities of a
+    relationship between the knockdown gene and each target in
+    simulated data. Gene 3 is the only true relationship.}
+  \label{fig:simPlot}
+\end{figure}
+
+\subsection{Knockdown Data Example}
+
+A more concrete example uses data from the National Institute of
+Health (NIH) Library of Integrated Network-based Cellular Signatures
+(LINCS) program (\url{http://lincsproject.org}) \cite{Duan14}. The aim
+of this program is to generate genetic and molecular signatures of
+cells in response to various perturbations. To support this endeavor,
+many large datasets have been made available, including proteomic and
+imaging data.
+
+The LINCS L1000 data captures gene expression levels of 1,000 genes in
+human cell lines under a variety of conditions. The \texttt{lincs.kd}
+data is a 21 by 27 matrix containing data from knockdown experiments
+targeting gene PPARG in cell line A375. The first row is the
+expression levels of PPARG in 27 different experiments, while the
+other rows are a subset of the measured genes in the same
+experiments. The data has been normalized to account for differences
+in the experimental settings, as described in \cite{Young2016}. The
+full LINCS L1000 data is available at \url{http://lincscloud.org}.
+
+Given the L1000 data, the \texttt{BayesKnockdown} function can be
+invoked to calculate the posterior probabilities of a relationship
+between gene PPARG and the other genes in the dataset. In this case,
+we specify a prior of 0.0005, reflecting the belief that there are
+very few relationships relative to the total possible number. Figure
+\ref{fig:kdPlot} shows the range of values returned for the different
+target genes.
+
+<<KnockdownEx>>=
+data(lincs.kd);
+kdResult <- BayesKnockdown(lincs.kd[1,], lincs.kd[-1,], prior=0.0005);
+barplot(kdResult, names.arg="", xlab="Target Gene",
+        ylab="Posterior Probability", ylim=c(0,1));
+@ 
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=.6\textwidth]{kdPlot.png}
+  \end{center}
+  \caption{Bar plot showing the posterior probabilities of a
+    relationship between the knockdown gene PPARG and each target in
+    LINCS L1000 data.}
+  \label{fig:simPlot}
+\end{figure}
+
+\section{2-Class Data}
+The \texttt{BayesKnockdown.diffExp} function tests for differential
+expression in a set of variables between two experimental
+conditions. In gene expression data, this often takes the form of
+comparing the effects of a drug perturbation compared to a
+baseline. Of interest is the set of genes which show different
+expression levels between the two conditions. The
+\texttt{BayesKnockdown.diffExp} function takes two matrices of
+observations for a set of variables, one matrix for each condition,
+and gives posterior probabilities that the variables are different
+between the two conditions.
+
+As an example, we generate two random datasets for 10 genes,
+corresponding to different experimental conditions. The first
+has 25 observations and the second has 30. We add an offset for gene 3
+in the second dataset, reflecting a change of expression between the
+two conditions. The \texttt{BayesKnockdown.diffExp} function produces
+posterior probabilities for each gene reflecting how likely they are
+to be expressed differently between the two conditions. Figure
+\ref{fig:diffExpPlot} shows the posterior probabilities that each gene
+is differentially expressed between the two conditions.
+
+<<BayesKnockdown.diffExp>>=
+n1 <- 25;
+n2 <- 30;
+p <- 10;
+y1 <- matrix(nrow=p, data=rnorm(n1*p));
+y2 <- matrix(nrow=p, data=rnorm(n2*p));
+y2[3,] <- y2[3,] + 1;
+
+diffExpResult <- BayesKnockdown.diffExp(y1, y2);
+
+barplot(diffExpResult, names.arg="", xlab="Target Gene",
+        ylab="Posterior Probability", ylim=c(0,1));
+@ 
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=.6\textwidth]{diffExpPlot.png}
+  \end{center}
+  \caption{Bar plot showing the posterior probabilities of 
+    relationship between the knockdown gene and each target in
+    simulated data. Gene 3 is the only true relationship.}
+  \label{fig:diffExpPlot}
+\end{figure}
+
+\section{Acknowledgements}
+
+{\it Funding}: This research was supported by National Institutes of
+Health grants [R01 HD054511 and R01 HD070936 to A.E.R., U54 HL127624
+to A.E.R. and K.Y.Y.]; Microsoft Azure for Research Award to K.Y.Y.;
+and Science Foundation Ireland ETS Walton visitor award 11/W.1/I207 to
+A.E.R.
+
+\bibliographystyle{plain}
+\nocite{*}
+\bibliography{BayesKnockdown}
+
+\end{document}
