@@ -1,6 +1,6 @@
 Package: BayesKnockdown
 Title: BayesKnockdown: Posterior Probabilities for Edges from Knockdown Data
-Version: 0.99.3
+Version: 0.99.4
 Date: 2016-06-28
 Author: William Chad Young
 Maintainer: William Chad Young <wmchad@uw.edu>
@@ -12,7 +12,7 @@ Description: A simple, fast Bayesian method for computing posterior
 	     the other genes are potential targets. Can also be used for
 	     differential expression/2-class data.
 Depends: R (>= 3.3)
-Imports: stats
+Imports: stats, Biobase
 License: GPL-3
 biocViews: NetworkInference, GeneExpression, GeneTarget, Network, Bayesian
 LazyData: true

@@ -90,3 +90,36 @@ BayesKnockdown.diffExp <- function(y1,
                    prior,
                    g);
 }
+
+#' Posterior Probabilities for ExpressionSet data
+#'
+#' Calculates posterior probabilities for an ExpressionSet object by defining
+#' one feature as the predictor. Each other feature in the ExpressionSet is
+#' is then used as a response variable and posterior probabilities are
+#' calculated, incorporating prior probabilities potentially unique to each
+#' response variable.
+#'
+#' @param es          An ExpressionSet object with \code{p} features and
+#'                    \code{n} samples.
+#' @param predFeature The name of the feature to use as the predictor.
+#' @param prior       Prior probabilities for the outcome variables.
+#'                    Defaults to 0.5 for all variables.
+#' @param g           The value to use for Zellner's \emph{g}-prior.
+#'                    Defaults to the square root of the number of observations.
+#' @return            A vector of \code{p-1} posterior probabilities indicating
+#'                    the probability of a relationship between the predictor
+#'                    variable and each outcome variable.
+#' @examples
+#' library(Biobase);
+#' data(sample.ExpressionSet);
+#' subset <- sample.ExpressionSet[1:10,];
+#'
+#' BayesKnockdown.es(subset, "AFFX-MurIL10_at");
+#' @export
+BayesKnockdown.es <- function(es, predFeature, prior=0.5,
+                                         g=sqrt(dims(es)[2,1])) {
+  data <- exprs(es);
+  BayesKnockdown(data[featureNames(es)==predFeature,],
+                 data[featureNames(es)!=predFeature,],
+                 prior, g);
+}

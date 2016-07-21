@@ -73,7 +73,7 @@ the expected strength of the signal relative to noise, with larger
 values corresponding to a larger expected signal. It is recommended
 that $g$ be set to a value between 1 and the number of observations in
 the data. The default value is $\sqrt{n}$, which we have found to be a
-good compromise between the extremes
+good compromise between the extremes.
 
 \subsection{Simulated Data Example}
 
@@ -84,6 +84,8 @@ and target number 3. The \texttt{BayesKnockdown} function takes this
 data and produces the posterior probability of a relationship between
 $x$ and each target. Figure \ref{fig:simPlot} shows the posterior
 probabilities calculated for each target.
+
+\newpage
 
 <<SimulatedEx>>=
 library(BayesKnockdown);
@@ -99,10 +101,14 @@ simResult;
 
 barplot(simResult, names.arg="", xlab="Target Gene",
         ylab="Posterior Probability", ylim=c(0,1));
-@ 
+@
+
 \begin{figure}
   \begin{center}
-    \includegraphics[width=.6\textwidth]{simBarPlot.png}
+<<label=simPlot,fig=TRUE,echo=FALSE,width=6,height=4>>=
+barplot(simResult, names.arg="", xlab="Target Gene",
+      ylab="Posterior Probability", ylim=c(0,1));
+@ 
   \end{center}
   \caption{Bar plot showing the posterior probabilities of a
     relationship between the knockdown gene and each target in
@@ -110,9 +116,11 @@ barplot(simResult, names.arg="", xlab="Target Gene",
   \label{fig:simPlot}
 \end{figure}
 
+\newpage
+
 \subsection{Knockdown Data Example}
 
-A more concrete example uses data from the National Institute of
+A more realistic example uses data from the National Institute of
 Health (NIH) Library of Integrated Network-based Cellular Signatures
 (LINCS) program (\url{http://lincsproject.org}) \cite{Duan14}. The aim
 of this program is to generate genetic and molecular signatures of
@@ -120,14 +128,14 @@ cells in response to various perturbations. To support this endeavor,
 many large datasets have been made available, including proteomic and
 imaging data.
 
-The LINCS L1000 data captures gene expression levels of 1,000 genes in
+The LINCS L1000 data capture gene expression levels of 1,000 genes in
 human cell lines under a variety of conditions. The \texttt{lincs.kd}
 data is a 21 by 27 matrix containing data from knockdown experiments
 targeting gene PPARG in cell line A375. Cell line A375 is a human skin
 melanoma cell line with over 100,000 experiments in the L1000
 data. The first row is the expression levels of PPARG in the 27
 experiments targeting PPARG for knockdown, while the other 20 rows are
-a subset of the measured genes in the same experiments. The data has
+a subset of the measured genes in the same experiments. The data have
 been normalized to account for differences in the experimental
 settings, as described in \cite{Young16}. The full LINCS L1000 data is
 available at \url{http://lincscloud.org}.
@@ -135,10 +143,10 @@ available at \url{http://lincscloud.org}.
 Given the L1000 data, the \texttt{BayesKnockdown} function can be
 invoked to calculate the posterior probabilities of a relationship
 between gene PPARG and the other genes in the dataset. In this case,
-we specify a prior of 0.0005, reflecting the belief that there are
-very few relationships relative to the total possible number. Figure
-\ref{fig:kdPlot} shows the range of values returned for the different
-target genes.
+we specify a prior probability of 0.0005, reflecting the belief that
+there are very few relationships relative to the total possible
+number. Figure \ref{fig:kdPlot} shows the range of values returned for
+the different target genes.
 
 <<KnockdownEx>>=
 data(lincs.kd);
@@ -150,13 +158,33 @@ barplot(kdResult, names.arg="", xlab="Target Gene",
 @ 
 \begin{figure}
   \begin{center}
-    \includegraphics[width=.6\textwidth]{kdPlot.png}
+<<label=kdPlot,fig=TRUE,echo=FALSE,width=6,height=4>>=
+barplot(kdResult, names.arg="", xlab="Target Gene",
+        ylab="Posterior Probability", ylim=c(0,1));
+@ 
   \end{center}
   \caption{Bar plot showing the posterior probabilities of a
     relationship between the knockdown gene PPARG and each target in
     LINCS L1000 data.}
   \label{fig:kdPlot}
 \end{figure}
+
+\subsection{ExpressionSet Example}
+
+The \texttt{BayesKnockdown.es} function allows calculation of
+posterior probabilities using an \texttt{ExpressionSet} object from
+the \texttt{bioBase} library. The function works similarly to the
+\texttt{BayesKnockdown} function, except that one of the features of
+the \texttt{ExpressionSet} is identified to be the predictor variable,
+and all other features are used as response variables.
+
+<<KnockdownES>>=
+library(Biobase);
+data(sample.ExpressionSet);
+subset <- sample.ExpressionSet[1:10,];
+
+BayesKnockdown.es(subset, "AFFX-MurIL10_at");
+@ 
 
 \section{2-Class Data}
 The \texttt{BayesKnockdown.diffExp} function tests for differential
@@ -195,7 +223,10 @@ barplot(diffExpResult, names.arg="", xlab="Target Gene",
 @ 
 \begin{figure}
   \begin{center}
-    \includegraphics[width=.6\textwidth]{diffExpPlot.png}
+<<label=diffExpPlot,fig=TRUE,echo=FALSE,width=6,height=4>>=
+barplot(diffExpResult, names.arg="", xlab="Target Gene",
+        ylab="Posterior Probability", ylim=c(0,1));
+@ 
   \end{center}
   \caption{Bar plot showing the posterior probabilities that each gene
     is differentially expressed between two conditions. Gene 3 is the

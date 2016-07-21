@@ -2,5 +2,9 @@
 
 export(BayesKnockdown)
 export(BayesKnockdown.diffExp)
+export(BayesKnockdown.es)
 
 importFrom("stats", "cor")
+importFrom("Biobase", "dims")
+importFrom("Biobase", "exprs")
+importFrom("Biobase", "featureNames")
